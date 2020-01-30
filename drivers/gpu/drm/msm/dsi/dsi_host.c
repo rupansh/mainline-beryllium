@@ -217,6 +217,8 @@ static const struct msm_dsi_cfg_handler *dsi_get_config(
 		goto put_gdsc;
 	}
 
+	pm_runtime_get_sync(dev);
+
 	ret = regulator_enable(gdsc_reg);
 	if (ret) {
 		pr_err("%s: unable to enable gdsc\n", __func__);
@@ -243,6 +245,7 @@ disable_clks:
 	clk_disable_unprepare(ahb_clk);
 disable_gdsc:
 	regulator_disable(gdsc_reg);
+	pm_runtime_put_sync(dev);
 put_gdsc:
 	regulator_put(gdsc_reg);
 exit:
@@ -389,8 +392,6 @@ static int dsi_clk_init(struct msm_dsi_host *msm_host)
 				__func__, cfg->bus_clk_names[i], ret);
 			goto exit;
 		}
-
-		clk_prepare_enable(msm_host->bus_clks[i]);
 	}
 
 	/* get link and source clocks */
@@ -437,16 +438,6 @@ static int dsi_clk_init(struct msm_dsi_host *msm_host)
 
 	if (cfg_hnd->ops->clk_init_ver)
 		ret = cfg_hnd->ops->clk_init_ver(msm_host);
-
-	/*
-	 * Do an extra enable/disable sequence initially to ensure the
-	 * clocks are actually off, if left enabled by bootloader..
-	 */
-	ret = cfg_hnd->ops->link_clk_enable(msm_host);
-	if (!ret)
-		cfg_hnd->ops->link_clk_disable(msm_host);
-	ret = 0;
-
 exit:
 	return ret;
 }
@@ -1849,7 +1840,6 @@ int msm_dsi_host_init(struct msm_dsi *msm_dsi)
 	}
 
 	pm_runtime_enable(&pdev->dev);
-	pm_runtime_get_sync(&pdev->dev);
 
 	msm_host->cfg_hnd = dsi_get_config(msm_host);
 	if (!msm_host->cfg_hnd) {
@@ -1879,8 +1869,6 @@ int msm_dsi_host_init(struct msm_dsi *msm_dsi)
 		pr_err("%s: unable to initialize dsi clks\n", __func__);
 		goto fail;
 	}
-
-	pm_runtime_put_sync(&pdev->dev);
 
 	msm_host->rx_buf = devm_kzalloc(&pdev->dev, SZ_4K, GFP_KERNEL);
 	if (!msm_host->rx_buf) {
