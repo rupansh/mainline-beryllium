@@ -1154,7 +1154,6 @@ static struct platform_driver mdp5_driver = {
 		.name = "msm_mdp",
 		.of_match_table = mdp5_dt_match,
 		.pm = &mdp5_pm_ops,
-		.driver_manages_iommu = true,
 	},
 };
 
