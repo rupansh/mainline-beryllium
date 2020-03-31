@@ -1,7 +1,7 @@
 . ${ROOT_DIR}/beryllium/build.config.common
 . ${ROOT_DIR}/beryllium/build.config.aarch64
 
-BRANCH=poco-v5.6-rc7
+BRANCH=beryllium-android-mainline
 KERNEL_DIR=beryllium
 
 DEFCONFIG=temp_gki_defconfig
