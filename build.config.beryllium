@@ -1,7 +1,7 @@
 . ${ROOT_DIR}/beryllium/build.config.common
 . ${ROOT_DIR}/beryllium/build.config.aarch64
 
-BRANCH=v5.5-display
+BRANCH=beryllium-android-5.4
 KERNEL_DIR=beryllium
 
 DEFCONFIG=temp_gki_defconfig
